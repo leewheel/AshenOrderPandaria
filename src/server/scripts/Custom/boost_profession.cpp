@@ -80,7 +80,7 @@ public:
             player->ADD_GOSSIP_ITEM_DB(51002, 13, GOSSIP_SENDER_MAIN, INSCRIPTION);
         if(player->HasSkill(ARCHAEOLOGY))
             player->ADD_GOSSIP_ITEM_DB(51002, 14, GOSSIP_SENDER_MAIN, ARCHAEOLOGY);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bye", GOSSIP_SENDER_MAIN, 1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "ты╪Ш", GOSSIP_SENDER_MAIN, 1);
 
         player->SEND_GOSSIP_MENU(20010, item->GetGUID());
         return true;
