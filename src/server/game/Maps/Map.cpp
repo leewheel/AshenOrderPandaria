@@ -140,7 +140,43 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 
     return true;
 }
+//leewheel 
+std::vector<std::tuple<int, int, int>> ignoredCoords = {
+    {530, 32, 32}, // {id, x, y}
+    {530, 31, 32},
+    {530, 31, 31},
+    {1064, 31, 31},
+    {1064, 32, 31},
+    {1064, 32, 32},
+    {571, 28, 26},
+    {571, 28, 27},
+    {571, 28, 28},
+    {571, 28, 29},
+    {571, 31, 31},
+    {571, 31, 32},
+    {571, 32, 31},
+    {571, 32, 32},
+    {0, 46, 21},
+    {0, 48, 27},
+    {0, 35, 42},
+    {0, 35, 43},
+    {0, 35, 44},
+    {0, 36, 45},
+    {0, 37, 45},
+    {1, 39, 44},
+};
 
+bool IsIgnoredCoords(int mapId, int gx, int gy)
+{
+    // Check Maps id, gx, gy if in Ignore list
+    for (const auto& coords : ignoredCoords)
+    {
+        if (std::get<0>(coords) == mapId && std::get<1>(coords) == gx && std::get<2>(coords) == gy)
+            return true;
+    }
+    return false;
+}
+//end leewheel
 void Map::LoadMMap(int gx, int gy)
 {
     if (!DisableMgr::IsPathfindingEnabled(GetId()))
@@ -149,9 +185,15 @@ void Map::LoadMMap(int gx, int gy)
     bool mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(GetId(), gx, gy);
 
     if (mmapLoadResult)
-        TC_LOG_DEBUG("maps", "MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+        if (!IsIgnoredCoords) //leewheel
+        {
+            TC_LOG_DEBUG("maps", "MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+        }
     else 
-        TC_LOG_ERROR("maps", "Could not load MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+        if (!IsIgnoredCoords) //leewheel
+        {
+            TC_LOG_ERROR("maps", "Could not load MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
+        }
 }
 
 void Map::LoadVMap(int gx, int gy)

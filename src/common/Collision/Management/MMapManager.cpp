@@ -112,7 +112,75 @@ namespace MMAP
     {
         return uint32(x << 16 | y);
     }
+    //leewheel 
+ // including the mmtile files that need to be filtered out and the corresponding map coordinates
+ std::vector<std::string> ignoredTiles = {
+     "ClientData/mmaps/0530_32_32.mmtile",
+     "ClientData/mmaps/0530_31_32.mmtile",
+     "ClientData/mmaps/0530_31_31.mmtile",
+     "ClientData/mmaps/1064_31_31.mmtile",
+     "ClientData/mmaps/1064_32_31.mmtile",
+     "ClientData/mmaps/1064_32_32.mmtile",
+     "ClientData/mmaps/0571_28_27.mmtile",
+     "ClientData/mmaps/0571_28_26.mmtile",
+     "ClientData/mmaps/0571_28_28.mmtile",
+     "ClientData/mmaps/0571_28_29.mmtile",
+     "ClientData/mmaps/0571_31_31.mmtile",
+     "ClientData/mmaps/0571_32_32.mmtile",
+     "ClientData/mmaps/0571_31_32.mmtile",
+     "ClientData/mmaps/0571_32_31.mmtile",
+     "ClientData/mmaps/0000_46_21.mmtile",
+     "ClientData/mmaps/0000_48_27.mmtile",
+     "ClientData/mmaps/0000_35_42.mmtile",
+     "ClientData/mmaps/0000_35_43.mmtile",
+     "ClientData/mmaps/0000_35_44.mmtile",
+     "ClientData/mmaps/0000_36_45.mmtile",
+     "ClientData/mmaps/0000_37_45.mmtile",
+     "ClientData/mmaps/0001_39_44.mmtile",
+ };
+ bool IsIgnoredTile(const std::string& tileName)
+ {
+     // check if tileName is in the ignore list.
+     if (std::find(ignoredTiles.begin(), ignoredTiles.end(), tileName) != ignoredTiles.end())
+         return true;
+ };
 
+ std::vector<std::tuple<int, int, int>> ignoredMapHead = {
+ {530, 32, 32}, // {id, x, y}
+ {530, 31, 32},
+ {530, 31, 31},
+ {1064, 31, 31},
+ {1064, 32, 31},
+ {1064, 32, 32},
+ {571, 28, 26},
+ {571, 28, 27},
+ {571, 28, 28},
+ {571, 28, 29},
+ {571, 31, 31},
+ {571, 31, 32},
+ {571, 32, 31},
+ {571, 32, 32},
+ {0, 46, 21},
+ {0, 48, 27},
+ {0, 35, 42},
+ {0, 35, 43},
+ {0, 35, 44},
+ {0, 36, 45},
+ {0, 37, 45},
+ {1, 39, 44},
+ };
+
+ bool IsIgnoredMapHead(int mapId, int gx, int gy)
+ {
+     // Check Maps id, gx, gy if in Ignore list
+     for (const auto& coords : ignoredMapHead)
+     {
+         if (std::get<0>(coords) == mapId && std::get<1>(coords) == gx && std::get<2>(coords) == gy)
+             return true;
+     }
+     return false;
+ }
+ //end leewheel
     bool MMapManager::loadMap(uint32 mapId, int32 x, int32 y)
     {
         // make sure the mmap is loaded and ready to load tiles
@@ -131,7 +199,7 @@ namespace MMAP
         // load this tile :: mmaps/MMMXXYY.mmtile
         std::string fileName = Trinity::StringFormat(TILE_FILE_NAME_FORMAT, sConfigMgr->GetStringDefault("DataDir", ".").c_str(), mapId, x, y);
         FILE* file = fopen(fileName.c_str(), "rb");
-        if (!file)
+        if (!file && !IsIgnoredTile) //leewheel
         {
             TC_LOG_ERROR("maps", "MMAP:loadMap: Could not open mmtile file '%s'", fileName.c_str());
             return false;
@@ -141,6 +209,7 @@ namespace MMAP
         MmapTileHeader fileHeader;
         if (fread(&fileHeader, sizeof(MmapTileHeader), 1, file) != 1 || fileHeader.mmapMagic != MMAP_MAGIC)
         {
+            if(!IsIgnoredMapHead) //leewheel
             TC_LOG_ERROR("maps", "MMAP:loadMap: Bad header in mmap %04u_%02i_%02i.mmtile", mapId, x, y);
             fclose(file);
             return false;
